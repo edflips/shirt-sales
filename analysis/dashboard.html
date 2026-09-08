@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Shirt Sales — Vinted UK football shirts</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.10);
+    --s1: #2a78d6;
+    --s1-deep: #104281;
+    --s1-track: #cde2fb;
+    --s2: #eb6834;
+    --hero-bg: #0d0d0d;
+    --hero-ink: #ffffff;
+    --hero-ink-2: #c3c2b7;
+    --hero-line: rgba(255, 255, 255, 0.08);
+    --shadow: 0 1px 2px rgba(11, 11, 11, 0.04);
+    --good-text: #006300;
+    --bad-text: #b3261e;
+  }
+  /* The page is pinned to the dark theme via data-theme="dark" on <html>
+     (the owner's preference — the light tokens above are kept only so the
+     token structure stays complete if that ever changes). */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --border: rgba(255, 255, 255, 0.10);
+      --s1: #3987e5;
+      --s1-deep: #cde2fb;
+      --s1-track: #184f95;
+      --s2: #d95926;
+      --shadow: none;
+      --good-text: #0ca30c;
+      --bad-text: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --s1: #3987e5;
+    --s1-deep: #cde2fb;
+    --s1-track: #184f95;
+    --s2: #d95926;
+    --shadow: none;
+    --good-text: #0ca30c;
+    --bad-text: #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    background: var(--page);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    padding: 56px 24px 48px;
+    isolation: isolate;
+  }
+  .hero-glow {
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(60% 80% at 85% 20%, rgba(42, 120, 214, 0.28), transparent 70%),
+      radial-gradient(40% 60% at 10% 100%, rgba(235, 104, 52, 0.12), transparent 70%);
+  }
+  .pitch {
+    position: absolute; right: -40px; top: -60px; height: 150%; z-index: -1;
+    opacity: 0.07; pointer-events: none;
+  }
+  .hero-inner { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; grid-template-columns: 1fr auto; align-items: end; }
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--hero-ink-2); margin: 0 0 18px;
+  }
+  .eyebrow b { color: var(--hero-ink); font-weight: 600; }
+  .hero-num {
+    font-size: clamp(64px, 10vw, 120px); font-weight: 700; line-height: 0.9;
+    letter-spacing: -0.035em; margin: 0; font-variant-numeric: proportional-nums;
+  }
+  .hero-label { font-size: 20px; font-weight: 500; margin: 14px 0 0; color: var(--hero-ink); }
+  .hero-sub { margin: 10px 0 0; color: var(--hero-ink-2); font-size: 14px; }
+  .hero-sub b { color: var(--hero-ink); font-weight: 600; }
+  .status {
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px 8px 12px;
+    border: 1px solid var(--hero-line); border-radius: 999px; font-size: 12px; color: var(--hero-ink-2);
+    background: rgba(255, 255, 255, 0.03); white-space: nowrap;
+  }
+  .status b { color: var(--hero-ink); font-weight: 500; }
+  .hero-side { display: flex; align-items: center; gap: 10px; }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: #0ca30c; position: relative; flex: none; }
+  .pulse::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 1.5px solid #0ca30c; opacity: 0; animation: ping 2.4s ease-out infinite;
+  }
+  @keyframes ping { 0% { transform: scale(0.5); opacity: 0.8; } 70%, 100% { transform: scale(1.6); opacity: 0; } }
+  .hero-rule { position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+    background: linear-gradient(90deg, var(--s1), var(--s2) 60%, transparent); }
+
+  /* ---------- layout ---------- */
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; }
+  section { margin-top: 44px; }
+  section:first-child { margin-top: 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 0 0 16px; flex-wrap: wrap; }
+  @media (max-width: 600px) { .sec-head p { flex-basis: 100%; margin-top: -4px; } }
+  .sec-head h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .sec-head .idx { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; color: var(--muted); }
+  .sec-head p { margin: 0; color: var(--ink-2); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+  .span-12 { grid-column: span 12; }
+  .span-7 { grid-column: span 7; }
+  .span-6 { grid-column: span 6; }
+  .span-5 { grid-column: span 5; }
+  .span-4 { grid-column: span 4; }
+  .rows-2 { grid-row: span 2; }
+  @media (max-width: 900px) { .grid > * { grid-column: span 12; grid-row: auto; } .hero-inner { grid-template-columns: 1fr; align-items: start; } }
+
+  /* ---------- time filter ---------- */
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 20px; }
+  .filters-lbl { font-size: 13px; color: var(--ink-2); }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 999px; padding: 3px; background: var(--surface); gap: 2px; }
+  .seg button { font: inherit; font-size: 12.5px; padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+  .seg button:hover { background: var(--page); color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .filters-note { font-size: 12px; color: var(--muted); }
+
+  /* ---------- kpi tiles ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px 14px; box-shadow: var(--shadow);
+  }
+  .tile .lbl { font-size: 12px; color: var(--ink-2); margin: 0 0 6px; }
+  .tile .val { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
+  .tile .val small { font-size: 16px; font-weight: 500; color: var(--ink-2); margin-left: 2px; }
+  .tile .note { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+
+  /* ---------- cards / figures ---------- */
+  figure.card {
+    margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 18px 14px; box-shadow: var(--shadow); min-width: 0;
+  }
+  figcaption { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  figcaption h3 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
+  figcaption p { margin: 3px 0 0; font-size: 12.5px; color: var(--ink-2); }
+  .tbtn {
+    flex: none; font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--ink-2);
+  }
+  .tbtn:hover { background: var(--page); color: var(--ink); }
+  .tbtn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .plot { position: relative; min-width: 0; }
+  .plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .plot-sub { font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  /* svg chrome */
+  .lbl { font-size: 12.5px; fill: var(--ink); }
+  .val { font-size: 12px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .tick { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .hit { fill: transparent; cursor: default; outline: none; }
+  .bar { fill: var(--s1); }
+  .bar.s2 { fill: var(--s2); }
+  .track { stroke: var(--s1); stroke-opacity: 0.35; stroke-width: 3; stroke-linecap: round; }
+  .median { fill: var(--s1-deep); stroke: var(--surface); stroke-width: 2; }
+  .line { fill: none; stroke: var(--s1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .area { fill: var(--s1); fill-opacity: 0.10; }
+  .dot { fill: var(--s1); stroke: var(--surface); stroke-width: 2; }
+  .xhair { stroke: var(--axis); stroke-width: 1; }
+  .mark-row:hover .bar, .mark-row:focus-within .bar, .mark-row.hot .bar { filter: brightness(1.15); }
+  .mark-row.hot .lbl { fill: var(--ink); font-weight: 600; }
+
+  /* animation: marks grow from the baseline, values fade in after */
+  .bar, .track, .iqr { transform-box: fill-box; transform-origin: left center; transform: scaleX(0);
+    transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .bar.v { transform-origin: center bottom; transform: scaleY(0); }
+  .drawn .bar, .drawn .track, .drawn .iqr { transform: none; }
+  .val, .median, .dot.end { opacity: 0; transition: opacity 0.4s ease 0.5s; }
+  .drawn .val, .drawn .median, .drawn .dot.end { opacity: 1; }
+  .line { transition: stroke-dashoffset 1.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .area { opacity: 0; transition: opacity 0.8s ease 0.8s; }
+  .drawn .area { opacity: 1; }
+
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* meter */
+  .meter-big { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; margin: 4px 0 8px; }
+  .meter-big small { font-size: 15px; font-weight: 500; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
+  .meter-track { height: 12px; border-radius: 999px; background: var(--s1-track); overflow: hidden; }
+  .meter-fill { height: 100%; width: 0; border-radius: 999px; background: var(--s1); transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s; }
+  .meter-keys { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-top: 10px; }
+  .meter-keys b { color: var(--ink); font-weight: 600; }
+
+  /* my shop */
+  .mini-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .mini-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .mini-tile { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--page); }
+  .mini-tile .lbl { font-size: 12px; color: var(--ink-2); margin: 0 0 4px; }
+  .mini-tile .val { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .shop td .t { font-weight: 600; }
+  .shop td a.t { color: inherit; text-decoration: none; border-bottom: 1px solid var(--axis); }
+  .shop td a.t:hover { border-bottom-color: var(--s1); color: var(--s1); }
+  .shop td a.t::after { content: " ↗"; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .shop td .sub { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .shop .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .shop .pill.active { background: var(--s1-track); color: var(--ink); }
+  .shop .pill.sold { background: var(--ink); color: var(--surface); }
+  .shop .up { color: var(--good-text); } .shop .down { color: var(--bad-text); }
+  /* narrow screens: each row becomes a card with labelled cells instead of a 5-column squeeze */
+  @media (max-width: 720px) {
+    .shop thead { display: none; }
+    .shop tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; padding: 14px 0; border-bottom: 1px solid var(--grid); }
+    .shop tbody td { display: block; padding: 0; border: 0; text-align: left; }
+    .shop tbody td.title { grid-column: 1 / -1; }
+    table.tv.shop tbody td.num { text-align: left; }
+    .shop tbody td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  }
+
+  /* table view */
+  table.tv { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.tv th, table.tv td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); }
+  table.tv th { font-weight: 600; color: var(--ink-2); font-size: 12px; }
+  table.tv td.num, table.tv th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .table { max-height: 420px; overflow: auto; }
+
+  /* tooltip */
+  .tip {
+    position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none;
+    background: var(--ink); color: var(--surface); padding: 8px 10px; border-radius: 8px;
+    font-size: 12px; line-height: 1.35; min-width: 120px; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .tip-row { display: flex; justify-content: space-between; gap: 14px; }
+  .tip-row strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tip-row span { opacity: 0.75; }
+
+  /* empty / locked state */
+  .locked { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; padding: 8px 4px; }
+  .locked .ring { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--grid); display: grid; place-items: center; position: relative; }
+  .locked .ring::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--s1);
+    border-right-color: transparent; border-bottom-color: transparent; animation: spin 6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .locked h3 { margin: 0 0 4px; font-size: 15px; }
+  .locked p { margin: 0; color: var(--ink-2); font-size: 13px; }
+  .locked p b { color: var(--ink); font-weight: 600; }
+
+  footer { max-width: 1240px; margin: 0 auto; padding: 0 24px 40px; color: var(--muted); font-size: 12px; }
+  footer p { margin: 4px 0; }
+  footer .credit { margin-top: 14px; }
+  footer .credit a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--axis); }
+  footer .credit a:hover { color: var(--ink); border-bottom-color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .bar, .track, .iqr, .bar.v { transform: none; }
+    .val, .median, .dot.end, .area, .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-glow"></div>
+  <svg class="pitch" viewBox="0 0 600 900" aria-hidden="true" fill="none" stroke="#fff" stroke-width="3">
+    <rect x="20" y="20" width="560" height="860" rx="4"/>
+    <line x1="20" y1="450" x2="580" y2="450"/>
+    <circle cx="300" cy="450" r="92"/>
+    <circle cx="300" cy="450" r="5" fill="#fff"/>
+    <rect x="135" y="20" width="330" height="165"/>
+    <rect x="225" y="20" width="150" height="60"/>
+    <path d="M225 185 A 92 92 0 0 0 375 185"/>
+    <rect x="135" y="715" width="330" height="165"/>
+    <rect x="225" y="820" width="150" height="60"/>
+    <path d="M225 715 A 92 92 0 0 1 375 715"/>
+  </svg>
+  <div class="hero-inner">
+    <div>
+      <p class="eyebrow">Vinted UK &nbsp;·&nbsp; <b>__SEASON__ season</b> &nbsp;·&nbsp; new with tags only</p>
+      <p class="hero-num" id="hero-num" data-count="__TOTAL_RAW__" data-format="int">__TOTAL__</p>
+      <p class="hero-label" id="hero-label">football shirts tracked since the project started</p>
+      <p class="hero-sub" id="hero-sub"></p>
+    </div>
+    <div class="hero-side">
+      <div class="status"><span class="pulse" aria-hidden="true"></span> Updated <b>__UPDATED__</b></div>
+    </div>
+  </div>
+  <div class="hero-rule"></div>
+</header>
+
+<main>
+  <div class="filters reveal" role="group" aria-label="Time range">
+    <span class="filters-lbl">Show listings uploaded in the last</span>
+    <div class="seg" id="range-seg"></div>
+    <span class="filters-note" id="range-note"></span>
+  </div>
+
+  <section class="reveal">
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="idx">01</span><h2>Who's listing what</h2><p>Team and player detection from listing titles</p></div>
+    <div class="grid">
+      <figure class="card reveal span-7 rows-2" data-chart="teams">
+        <figcaption><div><h3>Listings by team</h3><p>Top 20 teams by active listings — names parsed from titles</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="named">
+        <figcaption><div><h3>Named vs blank</h3><p>Share of shirts with a player name printed</p></div></figcaption>
+        <div class="plot"></div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="players">
+        <figcaption><div><h3>Player names</h3><p>Cross-checked against current squads where the team is known</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-12" data-chart="faves">
+        <figcaption><div><h3>Demand by team</h3><p>Average favourites per listing, top 12 teams by volume</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="idx">02</span><h2>Pricing &amp; supply</h2><p>What sellers are asking, and what's coming onto the market</p></div>
+    <div class="grid">
+      <figure class="card reveal span-7" data-chart="spread">
+        <figcaption><div><h3>Asking price by team</h3><p>Median with the middle 50% (bar) and 10th–90th percentile (line), top 10 teams</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="prices">
+        <figcaption><div><h3>Asking price distribution</h3><p>All active listings, £5 bands</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-7" data-chart="uploads">
+        <figcaption><div><h3>New listings per day</h3><p id="uploads-sub">Upload date of every tracked listing</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="sizes">
+        <figcaption><div><h3>Size mix</h3><p>Adult sizes as listed; kids' sizes grouped</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="sec-head"><span class="idx">03</span><h2>What actually sells</h2><p>Populates as tracked listings flip to sold</p></div>
+    <div class="grid">
+      <figure class="card reveal span-12" id="sold-locked">
+        <div class="locked">
+          <div class="ring" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div><h3>Sold analysis unlocks as listings sell</h3><p id="locked-text"></p></div>
+        </div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="namedSold">
+        <figcaption><div><h3>Named vs blank, once sold</h3><p>Each row on its own scale — compare the two bars, not the rows</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-7" data-chart="bands">
+        <figcaption><div><h3>Price bands</h3><p>Share of listings sold so far, and how fast, by asking price</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-5" data-chart="bumped">
+        <figcaption><div><h3>Bumped vs not bumped</h3><p>Listings the seller paid to push up search (£1.45 for 3 days) against the rest — each row on its own scale</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+      <figure class="card reveal span-7" data-chart="speed" hidden>
+        <figcaption><div><h3>Days to sell by team</h3><p>Average, teams with at least 5 sold</p></div><button class="tbtn" type="button" aria-pressed="false">Table</button></figcaption>
+        <div class="plot"></div><div class="table" hidden></div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="reveal" id="shop-section">
+    <div class="sec-head"><span class="idx">04</span><h2 id="shop-title">My shop</h2><p>Your own listings and sales, each set against the market for the same team</p></div>
+    <div class="grid">
+      <figure class="card reveal span-12" data-chart="mine">
+        <figcaption><div><h3 id="shop-h3">Listings and sales</h3><p>Active listings come from your Vinted wardrobe each run; past sales are recorded in <code>data/my_sales.json</code></p></div></figcaption>
+        <div class="plot"></div>
+      </figure>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Data scraped daily from vinted.co.uk (new-with-tags, current-season football shirts, UK sellers), stored in SQLite and rebuilt by GitHub Actions. Team and player names are parsed from listing titles and cross-checked against current squads; unmatched titles are counted but not attributed.</p>
+  <p class="credit">Hosted on <a href="https://www.netlify.com" target="_blank" rel="noopener">Netlify</a></p>
+</footer>
+
+<div class="tip" id="tip" hidden></div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  'use strict';
+  var DATA = JSON.parse(document.getElementById('data').textContent);
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS = 'http://www.w3.org/2000/svg';
+
+  // ---------- formatting ----------
+  var fmt = {
+    int: function (n) { return Math.round(n).toLocaleString('en-GB'); },
+    num1: function (n) { return (Math.round(n * 10) / 10).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); },
+    num2: function (n) { return n.toLocaleString('en-GB', { maximumFractionDigits: 2 }); },
+    gbp: function (n) { return '£' + (n >= 100 ? Math.round(n).toLocaleString('en-GB') : n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); },
+    gbp0: function (n) { return '£' + Math.round(n).toLocaleString('en-GB'); },
+    pct: function (n) { return Math.round(n) + '%'; },
+    // one decimal when the value isn't whole — for axes whose whole range is a few percent
+    pctAuto: function (n) { return (Math.abs(n - Math.round(n)) < 1e-9 ? Math.round(n) : (Math.round(n * 10) / 10).toFixed(1)) + '%'; },
+    days: function (n) { return fmt.num1(n) + ' days'; },
+    date: function (iso) { var d = new Date(iso + 'T00:00:00Z'); return d.getUTCDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]; }
+  };
+  var measureCtx = document.createElement('canvas').getContext('2d');
+  function measure(str, size) {
+    measureCtx.font = (size || 12.5) + 'px system-ui, -apple-system, "Segoe UI", sans-serif';
+    return measureCtx.measureText(str).width;
+  }
+  function niceMax(v) {
+    if (v <= 0) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(v)));
+    var m = v / p, steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10], n = 10;
+    for (var i = 0; i < steps.length; i++) if (m <= steps[i] + 1e-9) { n = steps[i]; break; }
+    return n * p;
+  }
+  function ticks(max, count) {
+    var step = niceMax(max / count);
+    var out = [];
+    for (var t = 0; t <= max + 1e-9; t += step) out.push(+t.toFixed(6));
+    return out;
+  }
+
+  // ---------- svg helpers ----------
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor, baseline) {
+    var t = el('text', { x: x, y: y, 'class': cls, 'text-anchor': anchor || 'start', 'dominant-baseline': baseline || 'middle' }, parent);
+    t.textContent = str;
+    return t;
+  }
+  function svgRoot(host, W, H, label) {
+    host.replaceChildren();
+    var s = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, role: 'img', 'aria-label': label }, host);
+    return s;
+  }
+  // rounded on the data end only, square at the baseline
+  function hBarPath(x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w, h / 2));
+    return 'M' + x + ',' + y + ' h' + (w - r) + ' a' + r + ',' + r + ' 0 0 1 ' + r + ',' + r + ' v' + (h - 2 * r) + ' a' + r + ',' + r + ' 0 0 1 -' + r + ',' + r + ' h-' + (w - r) + ' z';
+  }
+  function vBarPath(x, yTop, w, h, r) {
+    r = Math.max(0, Math.min(r, h, w / 2));
+    return 'M' + x + ',' + (yTop + h) + ' v-' + (h - r) + ' a' + r + ',' + r + ' 0 0 1 ' + r + ',-' + r + ' h' + (w - 2 * r) + ' a' + r + ',' + r + ' 0 0 1 ' + r + ',' + r + ' v' + (h - r) + ' z';
+  }
+
+  // ---------- tooltip ----------
+  var tip = document.getElementById('tip');
+  function showTip(rows, x, y) {
+    tip.replaceChildren();
+    rows.forEach(function (r) {
+      var row = document.createElement('div'); row.className = 'tip-row';
+      var v = document.createElement('strong'); v.textContent = r[0];
+      var l = document.createElement('span'); l.textContent = r[1];
+      row.append(v, l); tip.appendChild(row);
+    });
+    tip.hidden = false;
+    moveTip(x, y);
+  }
+  function moveTip(x, y) {
+    var pad = 14, r = tip.getBoundingClientRect();
+    var tx = x + pad, ty = y + pad;
+    if (tx + r.width > window.innerWidth - 8) tx = x - r.width - pad;
+    if (ty + r.height > window.innerHeight - 8) ty = y - r.height - pad;
+    tip.style.transform = 'translate(' + Math.max(4, tx) + 'px,' + Math.max(4, ty) + 'px)';
+  }
+  function hideTip() { tip.hidden = true; }
+  function bindTip(node, rowsFn) {
+    node.setAttribute('tabindex', '0');
+    node.addEventListener('pointerenter', function (e) { node.classList.add('hot'); showTip(rowsFn(), e.clientX, e.clientY); });
+    node.addEventListener('pointermove', function (e) { moveTip(e.clientX, e.clientY); });
+    node.addEventListener('pointerleave', function () { node.classList.remove('hot'); hideTip(); });
+    node.addEventListener('focus', function () { var r = node.getBoundingClientRect(); node.classList.add('hot'); showTip(rowsFn(), r.right, r.top); });
+    node.addEventListener('blur', function () { node.classList.remove('hot'); hideTip(); });
+  }
+
+  // ---------- renderers ----------
+  function hbars(host, W, rows, o) {
+    var format = o.format || fmt.int, rowH = 27, barH = 14, padT = 4, padB = 4;
+    var labelW = Math.min(o.maxLabel || 170, Math.max.apply(null, rows.map(function (r) { return measure(r.label); })) + 6);
+    var valueW = Math.max.apply(null, rows.map(function (r) { return measure(format(r.value), 12); })) + 10;
+    var x0 = labelW + 12, x1 = Math.max(x0 + 40, W - valueW - 4);
+    var max = Math.max.apply(null, rows.map(function (r) { return r.value; })) || 1;
+    var H = padT + rows.length * rowH + padB;
+    var svg = svgRoot(host, W, H, o.label);
+    rows.forEach(function (r, i) {
+      var y = padT + i * rowH, cy = y + rowH / 2, w = (x1 - x0) * (r.value / max);
+      var g = el('g', { 'class': 'mark-row' }, svg);
+      el('rect', { x: 0, y: y, width: W, height: rowH, 'class': 'hit' }, g);
+      txt(g, labelW, cy, r.label, 'lbl', 'end');
+      el('path', { d: hBarPath(x0, cy - barH / 2, w, barH, 4), 'class': 'bar', style: 'transition-delay:' + (i * 35) + 'ms' }, g);
+      txt(g, x0 + w + 8, cy, format(r.value), 'val', 'start').style.transitionDelay = (400 + i * 35) + 'ms';
+      bindTip(g, function () { return (o.tip ? o.tip(r) : [[format(r.value), o.unit || '']]); });
+    });
+  }
+
+  function columns(host, W, rows, o) {
+    var format = o.format || fmt.int, yFormat = o.yFormat || fmt.int;
+    var H = o.height || 220, padT = 20, padB = 26, padR = 8;
+    var max = niceMax(Math.max.apply(null, rows.map(function (r) { return r.value; })) || 1);
+    var tks = ticks(max, 4);
+    var padL = Math.max.apply(null, tks.map(function (t) { return measure(yFormat(t), 11); })) + 12;
+    var plotH = H - padT - padB, band = (W - padL - padR) / rows.length, colW = Math.min(24, band - 4);
+    var y = function (v) { return padT + plotH - (v / max) * plotH; };
+    var svg = svgRoot(host, W, H, o.label);
+    tks.forEach(function (t) {
+      el('line', { x1: padL, x2: W - padR, y1: y(t), y2: y(t), 'class': t === 0 ? 'axis-line' : 'grid-line' }, svg);
+      txt(svg, padL - 6, y(t), yFormat(t), 'tick', 'end');
+    });
+    var labelEvery = Math.max(1, Math.ceil((Math.max.apply(null, rows.map(function (r) { return measure(r.label, 11); })) + 8) / band));
+    var maxI = rows.reduce(function (m, r, i) { return r.value > rows[m].value ? i : m; }, 0);
+    rows.forEach(function (r, i) {
+      var cx = padL + band * i + band / 2, h = plotH * (r.value / max);
+      var g = el('g', { 'class': 'mark-row' }, svg);
+      el('rect', { x: padL + band * i, y: padT - 8, width: band, height: plotH + padB + 8, 'class': 'hit' }, g);
+      el('path', { d: vBarPath(cx - colW / 2, y(r.value), colW, h, 4), 'class': 'bar v' + (o.series2 ? ' s2' : ''), style: 'transition-delay:' + (i * 40) + 'ms' }, g);
+      if (i % labelEvery === 0 || rows.length <= 8) txt(g, cx, H - 8, r.label, 'tick', 'middle');
+      if (o.labelMax && i === maxI && r.value > 0) txt(g, cx, y(r.value) - 8, format(r.value), 'val', 'middle');
+      bindTip(g, function () { return o.tip ? o.tip(r) : [[format(r.value), r.label]]; });
+    });
+  }
+
+  function line(host, W, pts, o) {
+    var format = o.format || fmt.int, H = o.height || 230, padT = 16, padB = 28, padR = 18;
+    var max = niceMax(Math.max.apply(null, pts.map(function (p) { return p.value; })) || 1);
+    var tks = ticks(max, 4);
+    var padL = Math.max.apply(null, tks.map(function (t) { return measure(format(t), 11); })) + 12;
+    var plotH = H - padT - padB, n = pts.length;
+    var x = function (i) { return n === 1 ? (padL + W - padR) / 2 : padL + i * (W - padL - padR) / (n - 1); };
+    var y = function (v) { return padT + plotH - (v / max) * plotH; };
+    var svg = svgRoot(host, W, H, o.label);
+    tks.forEach(function (t) {
+      el('line', { x1: padL, x2: W - padR, y1: y(t), y2: y(t), 'class': t === 0 ? 'axis-line' : 'grid-line' }, svg);
+      txt(svg, padL - 6, y(t), format(t), 'tick', 'end');
+    });
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(p.value).toFixed(1); }).join(' ');
+    el('path', { d: d + ' L' + x(n - 1).toFixed(1) + ',' + y(0) + ' L' + x(0).toFixed(1) + ',' + y(0) + ' Z', 'class': 'area' }, svg);
+    var path = el('path', { d: d, 'class': 'line' }, svg);
+    var every = Math.max(1, Math.ceil(n / Math.floor((W - padL - padR) / 64)));
+    var labelled = [];
+    for (var li = 0; li < n; li += every) labelled.push(li);
+    // always label the last point, dropping a regular label that would sit on top of it
+    if (labelled[labelled.length - 1] !== n - 1) {
+      if (n - 1 - labelled[labelled.length - 1] < every * 0.6) labelled.pop();
+      labelled.push(n - 1);
+    }
+    labelled.forEach(function (i) {
+      txt(svg, x(i), H - 8, fmt.date(pts[i].date), 'tick', i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle');
+    });
+    el('circle', { cx: x(n - 1), cy: y(pts[n - 1].value), r: 4.5, 'class': 'dot end' }, svg);
+    var xhair = el('line', { x1: 0, x2: 0, y1: padT, y2: padT + plotH, 'class': 'xhair', visibility: 'hidden' }, svg);
+    var hdot = el('circle', { r: 4.5, 'class': 'dot', visibility: 'hidden' }, svg);
+    var overlay = el('rect', { x: padL - 10, y: padT, width: W - padL - padR + 20, height: plotH + padB, 'class': 'hit' }, svg);
+    var current = -1;
+    function at(clientX) {
+      var r = svg.getBoundingClientRect(), px = (clientX - r.left) * (W / r.width);
+      var i = Math.round((px - padL) / ((W - padL - padR) / Math.max(1, n - 1)));
+      return Math.max(0, Math.min(n - 1, i));
+    }
+    overlay.addEventListener('pointermove', function (e) {
+      var i = at(e.clientX), p = pts[i];
+      xhair.setAttribute('x1', x(i)); xhair.setAttribute('x2', x(i)); xhair.setAttribute('visibility', 'visible');
+      hdot.setAttribute('cx', x(i)); hdot.setAttribute('cy', y(p.value)); hdot.setAttribute('visibility', 'visible');
+      if (i !== current || tip.hidden) showTip([[format(p.value), o.unit || ''], [fmt.date(p.date), '']], e.clientX, e.clientY); else moveTip(e.clientX, e.clientY);
+      current = i;
+    });
+    overlay.addEventListener('pointerleave', function () { xhair.setAttribute('visibility', 'hidden'); hdot.setAttribute('visibility', 'hidden'); hideTip(); current = -1; });
+    // draw-on: dash the whole length, then let CSS transition the offset to 0 once .drawn lands
+    if (!REDUCED) {
+      var len = path.getTotalLength();
+      path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+      path.dataset.len = len;
+    }
+    return { path: path };
+  }
+
+  function rangeBars(host, W, rows, o) {
+    var rowH = 30, barH = 12, padT = 6, padB = 24;
+    var labelW = Math.min(170, Math.max.apply(null, rows.map(function (r) { return measure(r.label); })) + 6);
+    var valueW = Math.max.apply(null, rows.map(function (r) { return measure(fmt.gbp(r.median), 12); })) + 12;
+    var x0 = labelW + 12, x1 = W - valueW - 6;
+    var max = niceMax(Math.max.apply(null, rows.map(function (r) { return r.p90; })));
+    var x = function (v) { return x0 + (x1 - x0) * (v / max); };
+    var H = padT + rows.length * rowH + padB;
+    var svg = svgRoot(host, W, H, o.label);
+    ticks(max, 4).forEach(function (t) {
+      el('line', { x1: x(t), x2: x(t), y1: padT, y2: H - padB + 4, 'class': t === 0 ? 'axis-line' : 'grid-line' }, svg);
+      txt(svg, x(t), H - 8, fmt.gbp0(t), 'tick', 'middle');
+    });
+    rows.forEach(function (r, i) {
+      var y = padT + i * rowH, cy = y + rowH / 2;
+      var g = el('g', { 'class': 'mark-row' }, svg);
+      el('rect', { x: 0, y: y, width: W, height: rowH, 'class': 'hit' }, g);
+      txt(g, labelW, cy, r.label, 'lbl', 'end');
+      el('line', { x1: x(r.p10), x2: x(r.p90), y1: cy, y2: cy, 'class': 'track', style: 'transition-delay:' + (i * 40) + 'ms' }, g);
+      el('rect', { x: x(r.p25), y: cy - barH / 2, width: Math.max(2, x(r.p75) - x(r.p25)), height: barH, rx: 4, 'class': 'bar iqr', style: 'transition-delay:' + (i * 40 + 80) + 'ms' }, g);
+      el('circle', { cx: x(r.median), cy: cy, r: 5, 'class': 'median', style: 'transition-delay:' + (500 + i * 40) + 'ms' }, g);
+      txt(g, W - 2, cy, fmt.gbp(r.median), 'val', 'end').style.transitionDelay = (500 + i * 40) + 'ms';
+      bindTip(g, function () {
+        return [[fmt.gbp(r.median), 'median'], [fmt.gbp(r.p25) + '–' + fmt.gbp(r.p75), 'middle 50%'], [fmt.gbp(r.p10) + '–' + fmt.gbp(r.p90), '10th–90th pct'], [fmt.int(r.n), 'listings']];
+      });
+    });
+  }
+
+  function meter(host, k) {
+    host.replaceChildren();
+    var big = document.createElement('p'); big.className = 'meter-big';
+    var num = document.createElement('span'); num.textContent = '0%'; num.dataset.count = k.namedPct; num.dataset.format = 'pct';
+    var small = document.createElement('small'); small.textContent = 'carry a player name';
+    big.append(num, small);
+    var track = document.createElement('div'); track.className = 'meter-track';
+    var fill = document.createElement('div'); fill.className = 'meter-fill'; fill.dataset.width = k.namedPct + '%';
+    track.appendChild(fill);
+    var keys = document.createElement('div'); keys.className = 'meter-keys';
+    var a = document.createElement('span'); var ab = document.createElement('b'); ab.textContent = fmt.int(k.named); a.append(ab, document.createTextNode(' named'));
+    var b = document.createElement('span'); var bb = document.createElement('b'); bb.textContent = fmt.int(k.blank); b.append(bb, document.createTextNode(' blank or unrecognised'));
+    keys.append(a, b);
+    var note = document.createElement('p'); note.className = 'plot-sub'; note.style.marginTop = '12px';
+    note.textContent = 'A name only counts when it survives the stop-word filter and, where the team is known, matches that team’s current squad.';
+    host.append(big, track, keys, note);
+  }
+
+  // Two horizontal bars per row (named / blank), each row scaled to its own
+  // max — the metrics have different units, so rows aren't comparable and
+  // the layout shouldn't suggest they are. Values sit at the bar tips where
+  // they can't collide; the legend carries the colour.
+  function pairedHBars(host, W, rows, o) {
+    var keys = o.keys || ['named', 'blank'], labels = o.labels || ['Named', 'Blank'];
+    host.replaceChildren();
+    var legend = document.createElement('div'); legend.className = 'legend';
+    [[labels[0], 'var(--s1)'], [labels[1], 'var(--s2)']].forEach(function (s) {
+      var sp = document.createElement('span'); var i = document.createElement('i'); i.style.background = s[1];
+      sp.append(i, document.createTextNode(s[0])); legend.appendChild(sp);
+    });
+    host.appendChild(legend);
+    if (o.note) { var note = document.createElement('p'); note.className = 'plot-sub'; note.textContent = o.note; host.appendChild(note); }
+    var plot = document.createElement('div'); host.appendChild(plot);
+
+    var barH = 12, gap = 2, rowH = 56, padT = 4, padB = 4;
+    var labelW = Math.min(150, Math.max.apply(null, rows.map(function (r) { return measure(r.metric); })) + 6);
+    var valueW = Math.max.apply(null, rows.map(function (r) { var f = fmt[r.format] || fmt.num1; return Math.max(measure(f(r[keys[0]] || 0), 12), measure(f(r[keys[1]] || 0), 12)); })) + 10;
+    var x0 = labelW + 12, x1 = Math.max(x0 + 60, W - valueW - 4);
+    var H = padT + rows.length * rowH + padB;
+    var svg = svgRoot(plot, W, H, o.label);
+    rows.forEach(function (r, i) {
+      var f = fmt[r.format] || fmt.num1;
+      var max = Math.max(r[keys[0]] || 0, r[keys[1]] || 0) || 1;
+      var y = padT + i * rowH;
+      txt(svg, labelW, y + rowH / 2, r.metric, 'lbl', 'end');
+      [[keys[0], labels[0], ''], [keys[1], labels[1], ' s2']].forEach(function (s, j) {
+        var v = r[s[0]] || 0, w = (x1 - x0) * (v / max);
+        var by = y + rowH / 2 - barH - gap / 2 + j * (barH + gap);
+        var g = el('g', { 'class': 'mark-row' }, svg);
+        el('rect', { x: x0 - 4, y: by - 3, width: W - x0 + 4, height: barH + 6, 'class': 'hit' }, g);
+        el('path', { d: hBarPath(x0, by, w, barH, 4), 'class': 'bar' + s[2], style: 'transition-delay:' + (i * 70 + j * 40) + 'ms' }, g);
+        txt(g, x0 + w + 8, by + barH / 2, f(v), 'val', 'start').style.transitionDelay = (400 + i * 70 + j * 40) + 'ms';
+        bindTip(g, function () { return [[f(v), s[1]], [r.metric, '']]; });
+      });
+    });
+  }
+
+  // ---------- my shop ----------
+  function myShop(host, m) {
+    host.replaceChildren();
+    var tiles = document.createElement('div'); tiles.className = 'mini-tiles';
+    [['Shirts sold', fmt.int(m.sold)],
+     ['Revenue', m.revenue == null ? '–' : fmt.gbp(m.revenue)],
+     ['Avg days to sell', m.avgDaysToSell == null ? '–' : fmt.num1(m.avgDaysToSell)],
+     ['Listed now', fmt.int(m.active)]].forEach(function (t) {
+      var d = document.createElement('div'); d.className = 'mini-tile';
+      var l = document.createElement('p'); l.className = 'lbl'; l.textContent = t[0];
+      var v = document.createElement('p'); v.className = 'val'; v.textContent = t[1];
+      d.append(l, v); tiles.appendChild(d);
+    });
+    host.appendChild(tiles);
+
+    var t = document.createElement('table'); t.className = 'tv shop';
+    var hr = t.createTHead().insertRow();
+    ['Shirt', 'Listed', 'Price', 'vs market', 'Status'].forEach(function (h, i) { var th = document.createElement('th'); th.textContent = h; if (i === 2) th.className = 'num'; hr.appendChild(th); });
+    var tb = t.createTBody();
+    m.rows.forEach(function (r) {
+      var row = tb.insertRow();
+      var c0 = row.insertCell(); c0.className = 'title';
+      var tt = document.createElement(r.url ? 'a' : 'span'); tt.className = 't'; tt.textContent = r.title;
+      if (r.url) { tt.href = r.url; tt.target = '_blank'; tt.rel = 'noopener'; tt.title = 'Open the listing on Vinted'; }
+      c0.appendChild(tt);
+      var meta = [r.team, r.playerName ? r.playerName + (r.shirtNumber ? ' ' + r.shirtNumber : '') : null, r.size, r.bumped ? 'Bumped' : null].filter(Boolean).join(' · ');
+      if (meta) { var s0 = document.createElement('span'); s0.className = 'sub'; s0.textContent = meta; c0.appendChild(s0); }
+      var c1 = row.insertCell(); c1.dataset.label = 'Listed'; c1.textContent = r.listedAt ? fmt.date(r.listedAt) : '–';
+      var c2 = row.insertCell(); c2.className = 'num'; c2.dataset.label = 'Price';
+      var price = r.sold && r.soldPrice != null ? r.soldPrice : r.askingPrice;
+      c2.textContent = price == null ? '–' : fmt.gbp(price);
+      if (r.sold && r.soldPrice != null && r.askingPrice != null && r.askingPrice !== r.soldPrice) { var s2 = document.createElement('span'); s2.className = 'sub'; s2.textContent = 'listed at ' + fmt.gbp(r.askingPrice); c2.appendChild(s2); }
+      var c3 = row.insertCell(); c3.dataset.label = 'vs market';
+      if (r.marketMedian != null && price != null) {
+        var pct = 100 * (price - r.marketMedian) / r.marketMedian;
+        var d = document.createElement('span'); d.className = pct >= 0 ? 'up' : 'down'; d.textContent = (pct >= 0 ? '+' : '') + Math.round(pct) + '%';
+        c3.append(d, document.createTextNode(' vs ' + fmt.gbp(r.marketMedian) + ' median'));
+        var s3 = document.createElement('span'); s3.className = 'sub'; s3.textContent = fmt.int(r.marketCount) + ' ' + (r.team || '') + ' listings tracked'; c3.appendChild(s3);
+      } else { c3.textContent = r.team ? 'no market data yet' : 'team not recognised'; }
+      var c4 = row.insertCell(); c4.dataset.label = 'Status';
+      var pill = document.createElement('span'); pill.className = 'pill ' + (r.sold ? 'sold' : 'active'); pill.textContent = r.sold ? 'Sold' : 'Active'; c4.appendChild(pill);
+      var s4 = document.createElement('span'); s4.className = 'sub';
+      if (r.sold) {
+        var dts = r.daysToSell == null ? '' : r.daysToSell < 1 ? ' · same day' : ' · ' + fmt.num1(r.daysToSell) + ' days';
+        s4.textContent = (r.soldAt ? fmt.date(r.soldAt) : '') + dts + (r.marketDaysToSell != null ? ' (market avg ' + fmt.num1(r.marketDaysToSell) + ' days)' : '');
+      } else {
+        s4.textContent = [r.viewCount != null ? fmt.int(r.viewCount) + ' views' : null, r.favourites != null ? fmt.int(r.favourites) + ' favourites' : null].filter(Boolean).join(' · ');
+      }
+      c4.appendChild(s4);
+    });
+    host.appendChild(t);
+    if (!m.rows.some(function (r) { return r.sold; })) {
+      var note = document.createElement('p'); note.className = 'plot-sub'; note.style.marginTop = '12px';
+      note.textContent = 'No past sales recorded yet — add them to data/my_sales.json (title, sold price, listed and sold dates) and they appear here on the next run.';
+      host.appendChild(note);
+    }
+  }
+
+  // ---------- table view ----------
+  function buildTable(host, headers, rows, numeric) {
+    host.replaceChildren();
+    var t = document.createElement('table'); t.className = 'tv';
+    var thead = t.createTHead(), tr = thead.insertRow();
+    headers.forEach(function (h, i) { var th = document.createElement('th'); th.textContent = h; if (numeric[i]) th.className = 'num'; tr.appendChild(th); });
+    var tb = t.createTBody();
+    rows.forEach(function (r) { var row = tb.insertRow(); r.forEach(function (c, i) { var td = row.insertCell(); td.textContent = c; if (numeric[i]) td.className = 'num'; }); });
+    host.appendChild(t);
+  }
+
+  // ---------- views: one pre-aggregated block per filter preset, computed in Python ----------
+  // The page never sees individual listings, so its size doesn't grow with the database.
+  var META = DATA.meta, VIEWS = DATA.views, MINE = DATA.mine;
+
+  // ---------- chart registry (reads the current view V) ----------
+  var V = null;
+  var CHARTS = {
+    teams: {
+      data: function () { return V.teams; },
+      render: function (host, W) { hbars(host, W, V.teams, { label: 'Listings by team', unit: 'listings' }); },
+      table: function () { return [['Team', 'Listings'], V.teams.map(function (r) { return [r.label, fmt.int(r.value)]; }), [0, 1]]; }
+    },
+    named: { data: function () { return V.kpis.total ? [1] : []; }, render: function (host) { meter(host, V.kpis); } },
+    players: {
+      data: function () { return V.players; },
+      render: function (host, W) { hbars(host, W, V.players, { label: 'Player names', unit: 'listings' }); },
+      table: function () { return [['Player', 'Listings'], V.players.map(function (r) { return [r.label, fmt.int(r.value)]; }), [0, 1]]; }
+    },
+    faves: {
+      data: function () { return V.favesByTeam; },
+      render: function (host, W) { hbars(host, W, V.favesByTeam, { label: 'Average favourites by team', format: fmt.num1, tip: function (r) { return [[fmt.num1(r.value), 'avg favourites'], [fmt.int(r.n), 'listings']]; } }); },
+      table: function () { return [['Team', 'Avg favourites', 'Listings'], V.favesByTeam.map(function (r) { return [r.label, fmt.num1(r.value), fmt.int(r.n)]; }), [0, 1, 1]]; }
+    },
+    spread: {
+      data: function () { return V.priceSpread; },
+      render: function (host, W) { rangeBars(host, W, V.priceSpread, { label: 'Asking price by team' }); },
+      table: function () { return [['Team', 'Median', 'Middle 50%', '10th–90th pct', 'Listings'], V.priceSpread.map(function (r) { return [r.label, fmt.gbp(r.median), fmt.gbp(r.p25) + ' – ' + fmt.gbp(r.p75), fmt.gbp(r.p10) + ' – ' + fmt.gbp(r.p90), fmt.int(r.n)]; }), [0, 1, 1, 1, 1]]; }
+    },
+    prices: {
+      data: function () { return V.kpis.total ? V.prices : []; },
+      render: function (host, W) { columns(host, W, V.prices, { label: 'Asking price distribution', labelMax: true, tip: function (r) { return [[fmt.int(r.value), 'listings'], [r.label, '']]; } }); },
+      table: function () { return [['Price band', 'Listings'], V.prices.map(function (r) { return [r.label, fmt.int(r.value)]; }), [0, 1]]; }
+    },
+    uploads: {
+      data: function () { return V.uploads; },
+      render: function (host, W) { return line(host, W, V.uploads, { label: 'New listings per day', unit: 'uploaded' }); },
+      table: function () { return [['Date', 'Uploaded'], V.uploads.map(function (r) { return [fmt.date(r.date), fmt.int(r.value)]; }), [0, 1]]; }
+    },
+    sizes: {
+      data: function () { return V.sizes; },
+      render: function (host, W) { columns(host, W, V.sizes, { label: 'Size mix', labelMax: true, tip: function (r) { return [[fmt.int(r.value), 'listings'], [r.label, '']]; } }); },
+      table: function () { return [['Size', 'Listings'], V.sizes.map(function (r) { return [r.label, fmt.int(r.value)]; }), [0, 1]]; }
+    },
+    speed: {
+      data: function () { return V.sold.available ? V.sold.sellSpeed : []; },
+      render: function (host, W) { hbars(host, W, V.sold.sellSpeed, { label: 'Days to sell by team', format: fmt.num1, tip: function (r) { return [[fmt.days(r.value), 'avg'], [fmt.int(r.n), 'sold']]; } }); },
+      table: function () { return [['Team', 'Avg days to sell', 'Sold'], V.sold.sellSpeed.map(function (r) { return [r.label, fmt.num1(r.value), fmt.int(r.n)]; }), [0, 1, 1]]; }
+    },
+    namedSold: {
+      data: function () { return V.sold.available ? V.sold.namedVsBlank : []; },
+      render: function (host, W) {
+        var S = V.sold;
+        pairedHBars(host, W, S.namedVsBlank, { label: 'Named vs blank, once sold',
+          note: fmt.int(S.namedSoldCount) + ' named and ' + fmt.int(S.blankSoldCount) + ' blank shirts sold in this period — small samples, treat as indicative' });
+      },
+      table: function () { return [['Metric', 'Named', 'Blank'], V.sold.namedVsBlank.map(function (r) { var f = fmt[r.format] || fmt.num1; return [r.metric, r.named == null ? '–' : f(r.named), r.blank == null ? '–' : f(r.blank)]; }), [0, 1, 1]]; }
+    },
+    bumped: {
+      data: function () { return V.sold.available ? V.sold.bumpedVsOrganic : []; },
+      render: function (host, W) {
+        var S = V.sold, c = S.bumpedCounts;
+        pairedHBars(host, W, S.bumpedVsOrganic, { label: 'Bumped vs not bumped', keys: ['bumped', 'organic'], labels: ['Bumped', 'Not bumped'],
+          note: fmt.int(c.bumped) + ' bumped listings (' + fmt.int(c.bumpedSold) + ' sold) vs ' + fmt.int(c.organic) + ' not bumped (' + fmt.int(c.organicSold) + ' sold) in this period — sell rate is over all listings, the rest over those that sold' });
+      },
+      table: function () { return [['Metric', 'Bumped', 'Not bumped'], V.sold.bumpedVsOrganic.map(function (r) { var f = fmt[r.format] || fmt.num1; return [r.metric, r.bumped == null ? '–' : f(r.bumped), r.organic == null ? '–' : f(r.organic)]; }), [0, 1, 1]]; }
+    },
+    bands: {
+      data: function () { return V.sold.available ? V.sold.priceBands : []; },
+      render: function (host, W) {
+        var S = V.sold;
+        host.replaceChildren();
+        var wrap = document.createElement('div'); wrap.style.display = 'grid'; wrap.style.gridTemplateColumns = 'repeat(auto-fit, minmax(260px, 1fr))'; wrap.style.gap = '20px';
+        host.appendChild(wrap);
+        var metrics = [['Sell rate', 'sellRate', fmt.pctAuto, 'sold so far'], ['Average days to sell', 'avgDays', fmt.num1, 'days']];
+        // Build every cell before measuring any: measuring the first cell while
+        // it's alone in the grid hands it the full width, and the chart is then
+        // scaled down to half size once the second cell splits the row.
+        var plots = metrics.map(function (m) {
+          var cell = document.createElement('div'); var cap = document.createElement('p'); cap.className = 'plot-sub'; cap.textContent = m[0];
+          var plot = document.createElement('div'); cell.append(cap, plot); wrap.appendChild(cell);
+          return plot;
+        });
+        metrics.forEach(function (m, i) {
+          var rows = S.priceBands.map(function (r) { return { label: r.label, value: r[m[1]] || 0, raw: r }; });
+          var w = Math.max(200, plots[i].clientWidth || (W - 20) / 2);
+          columns(plots[i], w, rows, { label: m[0] + ' by price band', format: m[2], yFormat: m[2] === fmt.pctAuto ? fmt.pctAuto : fmt.num1, labelMax: true, tip: function (r) { return [[m[2](r.value), m[3]], [fmt.int(r.raw.sold) + ' of ' + fmt.int(r.raw.total), 'sold / seen'], [r.label, '']]; } });
+        });
+      },
+      table: function () { return [['Price band', 'Sell rate', 'Avg days to sell', 'Sold', 'Seen'], V.sold.priceBands.map(function (r) { return [r.label, fmt.pctAuto(r.sellRate), r.avgDays == null ? '–' : fmt.num1(r.avgDays), fmt.int(r.sold), fmt.int(r.total)]; }), [0, 1, 1, 1, 1]]; }
+    }
+  };
+
+  CHARTS.mine = {
+    data: function () { return V.mine.rows; },
+    render: function (host) { myShop(host, V.mine); }
+  };
+  if (MINE) {
+    var h3 = document.getElementById('shop-h3');
+    h3.replaceChildren();
+    var a = document.createElement('a'); a.href = MINE.profileUrl; a.textContent = MINE.username; a.target = '_blank'; a.rel = 'noopener';
+    h3.append(a, document.createTextNode(' on Vinted'));
+  }
+
+  // ---------- hero, kpis, locked state (re-rendered on every filter change) ----------
+  function b(s) { var e = document.createElement('b'); e.textContent = s; return e; }
+  function renderHero(v, range, animate) {
+    var num = document.getElementById('hero-num'), K = v.kpis;
+    num.dataset.count = K.total;
+    if (animate && !REDUCED) countUp(num); else num.textContent = fmt.int(K.total);
+    document.getElementById('hero-label').textContent = v.cutoff == null
+      ? 'football shirts tracked since the project started'
+      : 'football shirts listed in the last ' + range.label.toLowerCase();
+    var p = document.getElementById('hero-sub'); p.replaceChildren();
+    p.append(b(fmt.int(K.active)), ' still active · ', b(fmt.int(K.sold)), ' sold · tracking for ', b(META.daysTracking + (META.daysTracking === 1 ? ' day' : ' days')));
+  }
+  function renderKpis(v, animate) {
+    var host = document.getElementById('kpis'), K = v.kpis; host.replaceChildren();
+    [['Sold', K.sold, 'int', fmt.int(K.active) + ' still active'],
+     ['Team identified', K.teamPct, 'pct', fmt.int(K.teamed) + ' of ' + fmt.int(K.total) + ' listings'],
+     ['With a player name', K.namedPct, 'pct', fmt.int(K.named) + ' shirts'],
+     ['Median asking price', K.medianPrice, 'gbp', 'across listings in this period'],
+     ['Bumped by the seller', K.bumpedPct, 'pct', fmt.int(K.bumped) + ' listings seen with a paid bump']
+    ].forEach(function (t, i) {
+      var tile = document.createElement('div'); tile.className = 'tile reveal in'; tile.style.transitionDelay = (i * 60) + 'ms';
+      var l = document.createElement('p'); l.className = 'lbl'; l.textContent = t[0];
+      var val = document.createElement('p'); val.className = 'val'; val.dataset.count = t[1] == null ? 0 : t[1]; val.dataset.format = t[2];
+      val.textContent = t[1] == null ? '–' : fmt[t[2]](t[1]);
+      var n = document.createElement('p'); n.className = 'note'; n.textContent = t[3];
+      tile.append(l, val, n); host.appendChild(tile);
+      if (animate && !REDUCED && t[1] != null) countUp(val);
+    });
+  }
+  function renderLocked(v) {
+    var S = v.sold, card = document.getElementById('sold-locked');
+    card.hidden = S.available;
+    if (S.available) return;
+    var p = document.getElementById('locked-text'); p.replaceChildren();
+    p.append('Every active listing is re-checked daily; when one disappears or goes out of stock it’s marked sold and its time-to-sell is recorded. ', b(fmt.int(S.count)), ' sold in this period — charts appear at ', b(fmt.int(S.min_required)), '.');
+  }
+
+  // ---------- wire figures ----------
+  var figures = Array.prototype.slice.call(document.querySelectorAll('figure[data-chart]'));
+  figures.forEach(function (fig) {
+    var c = CHARTS[fig.dataset.chart];
+    if (!c) { fig.hidden = true; return; }
+    var plot = fig.querySelector('.plot'), table = fig.querySelector('.table'), btn = fig.querySelector('.tbtn');
+    var lastW = 0, drawnOnce = false;
+    function draw(force) {
+      var W = Math.floor(plot.clientWidth);
+      if (!W || (W === lastW && !force)) return;
+      lastW = W;
+      c.render(plot, W);
+      if (drawnOnce) arm(fig, true);
+    }
+    if (btn && c.table) {
+      btn.addEventListener('click', function () {
+        var on = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? 'Chart' : 'Table';
+        if (on) { var t = c.table(); buildTable(table, t[0], t[1], t[2]); }
+        table.hidden = !on; plot.hidden = on;
+      });
+    } else if (btn) { btn.hidden = true; }
+    // Called on every filter change: hide if the view has nothing for this
+    // chart, otherwise redraw — and re-run the grow-in animation from scratch.
+    fig._refresh = function (animate) {
+      var d = c.data();
+      fig.hidden = !(d && d.length);
+      if (fig.hidden) return;
+      if (animate) { fig.classList.remove('drawn'); drawnOnce = false; }
+      draw(true);
+      if (btn && c.table && btn.getAttribute('aria-pressed') === 'true') { var t = c.table(); buildTable(table, t[0], t[1], t[2]); }
+      if (animate) { void fig.offsetWidth; arm(fig); }
+    };
+    if ('ResizeObserver' in window) new ResizeObserver(function () { window.requestAnimationFrame(function () { draw(false); }); }).observe(plot);
+    fig._armed = function () { drawnOnce = true; };
+  });
+
+  // ---------- time filter ----------
+  var RANGES = META.ranges;   // [{key, label}], in display order; keys index VIEWS
+  var seg = document.getElementById('range-seg'), rangeNote = document.getElementById('range-note');
+  function setRange(range, animate) {
+    V = VIEWS[range.key];
+    var cutoff = V.cutoff;
+    document.getElementById('shop-section').hidden = !(MINE && MINE.rows.length);
+    seg.querySelectorAll('button').forEach(function (btn) { btn.setAttribute('aria-pressed', String(btn.dataset.key === range.key)); });
+    rangeNote.textContent = cutoff ? 'uploaded on or after ' + fmt.date(cutoff) + ', relative to the last update' : 'every listing since the project started';
+    document.getElementById('uploads-sub').textContent = 'Upload date of every tracked listing, per day' + (V.uploads.length ? ' (' + fmt.date(V.uploads[0].date) + ' – ' + fmt.date(V.uploads[V.uploads.length - 1].date) + ')' : '');
+    renderHero(V, range, animate); renderKpis(V, animate); renderLocked(V);
+    figures.forEach(function (fig) { fig._refresh(animate); });
+    try { localStorage.setItem('range', range.key); } catch (e) {}
+  }
+  RANGES.forEach(function (r) {
+    var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = r.label; btn.dataset.key = r.key; btn.setAttribute('aria-pressed', 'false');
+    btn.addEventListener('click', function () { setRange(r, true); });
+    seg.appendChild(btn);
+  });
+  var initial = RANGES[0];
+  try { var savedKey = localStorage.getItem('range'); initial = RANGES.filter(function (r) { return r.key === savedKey; })[0] || RANGES[0]; } catch (e) {}
+  setRange(initial, false);
+
+  // ---------- animation triggers ----------
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function countUp(node) {
+    var target = parseFloat(node.dataset.count), f = fmt[node.dataset.format] || fmt.int;
+    if (REDUCED || !isFinite(target)) { node.textContent = f(target); return; }
+    var t0 = performance.now(), dur = 1100;
+    (function step(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      node.textContent = f(target * easeOut(p));
+      if (p < 1) window.requestAnimationFrame(step);
+    })(t0);
+  }
+  function arm(node, instant) {
+    node.classList.add('in');
+    if (node.classList.contains('drawn')) return;
+    node.classList.add('drawn');
+    if (node._armed) node._armed();
+    node.querySelectorAll('.line[data-len]').forEach(function (p) {
+      if (instant) p.style.transition = 'none';
+      p.style.strokeDashoffset = 0;
+    });
+    node.querySelectorAll('.meter-fill').forEach(function (m) { m.style.width = m.dataset.width; });
+    node.querySelectorAll('[data-count]').forEach(instant ? function (n) { n.textContent = (fmt[n.dataset.format] || fmt.int)(parseFloat(n.dataset.count)); } : countUp);
+  }
+  var targets = Array.prototype.slice.call(document.querySelectorAll('.reveal, figure[data-chart], .hero'));
+  if ('IntersectionObserver' in window && !REDUCED) {
+    // Reveal as soon as any part of a target enters the viewport. A ratio
+    // threshold (0.12 originally) fails on tall sections at tablet widths:
+    // the sliver above the fold never reaches it, so the section looks
+    // like the end of the page until you scroll.
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { arm(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
+    targets.forEach(function (t) { io.observe(t); });
+    // Belt and braces for browsers that don't deliver the initial callback
+    // for already-visible targets: arm anything in view right now.
+    window.requestAnimationFrame(function () {
+      targets.forEach(function (t) { if (t.getBoundingClientRect().top < window.innerHeight - 40) arm(t); });
+    });
+  } else {
+    targets.forEach(function (t) { arm(t, true); });
+  }
+})();
+</script>
+</body>
+</html>

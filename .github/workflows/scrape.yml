@@ -1,0 +1,95 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    # Fallback only. The primary trigger is a Netlify scheduled function
+    # (netlify/functions/trigger-scrape.mts) that dispatches this workflow at
+    # 01:17 UTC — GitHub's own scheduler skipped or delayed every slot it was
+    # given here. This cron fires later and is skipped if a run already
+    # happened today (see the guard job).
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+# Never run two scrapes at once (a late-firing scheduled run once overlapped
+# a manual one): a second run waits for the first to finish instead.
+concurrency:
+  group: daily-scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  guard:
+    # For the fallback cron only: skip if a scrape already started in the
+    # last 12 hours (i.e. the Netlify trigger did its job).
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          since=$(date -u -d '12 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
+          recent=$(gh run list --repo "${{ github.repository }}" --workflow scrape.yml --created ">=$since" \
+                     --json databaseId,status,conclusion,event \
+                     --jq "[.[] | select(.databaseId != ${{ github.run_id }}) | select(.conclusion == \"success\" or .status == \"in_progress\" or .status == \"queued\")] | length")
+          echo "runs in the last 12h (excluding this one): $recent"
+          if [ "$recent" -gt 0 ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
+
+  scrape:
+    needs: guard
+    if: needs.guard.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    env:
+      # Data lives in Turso, not in this repo (see docs/06-running.md) — two
+      # databases, so a leaked token for one never exposes the other.
+      TURSO_MARKET_URL: ${{ secrets.TURSO_MARKET_URL }}
+      TURSO_MARKET_TOKEN: ${{ secrets.TURSO_MARKET_TOKEN }}
+      TURSO_MINE_URL: ${{ secrets.TURSO_MINE_URL }}
+      TURSO_MINE_TOKEN: ${{ secrets.TURSO_MINE_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python -m scraper.run
+
+      - name: Generate spreadsheet
+        run: python -m analysis.export
+
+      - name: Generate dashboard
+        run: python -m analysis.visualise
+
+      - name: Move spreadsheet into docs/ for deployment
+        # So it deploys to Netlify alongside index.html and is covered by the
+        # same Basic Auth edge function — no separate hosting/auth needed.
+        run: mv output/shirt-sales.xlsx docs/shirt-sales.xlsx
+
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx netlify deploy --dir=docs --prod
+
+      # Runs even if an earlier step failed. Opens/updates a GitHub Issue and
+      # fails the run if the scraper flagged that Vinted is blocking us.
+      - name: Alert if Vinted blocked us
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m scraper.alert

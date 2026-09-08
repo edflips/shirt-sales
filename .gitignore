@@ -1,0 +1,22 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.log
+
+# Local Netlify folder
+.netlify
+logs/run-status.json
+
+# Data now lives in Turso (see docs/06-running.md) — these are just local
+# embedded-replica caches and generated output, never committed.
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-info
+data/shirts.db.pre-*backup*
+output/*.xlsx
+docs/index.html
+.DS_Store
+data/my_sales.json

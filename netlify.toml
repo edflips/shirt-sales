@@ -1,0 +1,9 @@
+[build]
+  publish = "docs"
+  edge_functions = "netlify/edge-functions"
+  functions = "netlify/functions"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
