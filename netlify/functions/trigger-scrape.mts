@@ -38,8 +38,8 @@ export default async () => {
   return new Response(`github said ${res.status}`, { status: 502 });
 };
 
-// TEMPORARY TEST — set 2026-09-09 to fire at 15:03 UTC, 5 min out, to check
+// TEMPORARY TEST — set 2026-09-09 to fire at 15:26 UTC, 5 min out, to check
 // whether the real cron scheduler invokes this (unlike the dashboard's
 // "Run now" button, which accepted the request but never actually ran it).
 // Revert to "17 1 * * *" (01:17 UTC daily) once confirmed.
-export const config: Config = { schedule: "3 15 * * *" };
+export const config: Config = { schedule: "26 15 * * *" };
