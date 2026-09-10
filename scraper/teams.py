@@ -129,6 +129,7 @@ OFF_TOPIC_SIGNALS = [
     "basketball", "baseball", "american football", "f1 ", "formula 1",
     "esports", "polo", "hoodie", "tank top", "sweatshirt", "1/4 zip",
     "1/4-zip", "quarter zip", "training top", "tracksuit", "compression",
+    "co-ord", "co ord", "2 piece", "two piece",
     # Football-adjacent but not a shirt
     "boots", "trading card", "panini", "adrenalyn", "top trumps",
     "referee", "base layer", "pyjamas", "pjamas", "pajamas",
