@@ -93,7 +93,7 @@ Search for new listings:
     For each item:
       Skip if not a UK/GBP listing, if the title is off-topic (is_off_topic),
         or if the title names a non-current season (matches_current_season)
-      If listing_id not in DB → upsert_listing() as new
+      If listing_id not in DB → included in the next upsert_listings_batch() call
       If already in DB → update favourites + last_seen_at
 
 Log run stats to scrape_runs table

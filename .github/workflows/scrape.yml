@@ -2,11 +2,11 @@ name: Daily Scrape
 
 on:
   schedule:
-    # Fallback only. The primary trigger is a Netlify scheduled function
-    # (netlify/functions/trigger-scrape.mts) that dispatches this workflow at
-    # 01:17 UTC — GitHub's own scheduler skipped or delayed every slot it was
-    # given here. This cron fires later and is skipped if a run already
-    # happened today (see the guard job).
+    # Fallback only. The primary trigger is a standalone Cloudflare Worker
+    # (~/apps/shirt-sales-cron-trigger, not part of this repo) that dispatches
+    # this workflow at 01:17 UTC — GitHub's own scheduler skipped or delayed
+    # every slot it was given here. This cron fires later and is skipped if a
+    # run already happened today (see the guard job).
     - cron: '17 4 * * *'
   workflow_dispatch:
 

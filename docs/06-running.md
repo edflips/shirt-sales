@@ -26,8 +26,7 @@ shirt-sales/
 │   ├── visualise.py        ← Turso → aggregates → docs/index.html
 │   └── dashboard.html      ← dashboard template (CSS + inline-SVG chart renderer)
 ├── netlify/
-│   ├── edge-functions/auth.ts      ← HTTP Basic Auth in front of the dashboard
-│   └── functions/trigger-scrape.mts ← scheduled: dispatches the daily scrape at 01:17 UTC
+│   └── edge-functions/auth.ts      ← HTTP Basic Auth in front of the dashboard
 ├── netlify.toml
 ├── .github/
 │   └── workflows/
@@ -102,18 +101,19 @@ Nothing generated is committed back to the repo — the database lives in Turso 
 ## GitHub Actions cron
 
 `.github/workflows/scrape.yml`:
-- **Primary trigger: a Netlify scheduled function**, `netlify/functions/trigger-scrape.mts`, which calls GitHub's `workflow_dispatch` API at **01:17 UTC** (02:17 BST — most listings go up before midnight, a run takes about an hour, so the data is fresh well before morning). GitHub's own cron scheduler is best-effort and for this repo skipped or delayed *every* slot it was given (08:00 fired six hours late; 04:17 never fired), which is why the trigger lives on Netlify, whose scheduler is reliable.
-- **Fallback: the workflow's own cron at 04:17 UTC**, gated by a `guard` job that skips the scrape if any run started in the previous 12 hours — so on a normal day the fallback does nothing, and if Netlify ever fails to fire, GitHub (eventually) does.
+- **Primary trigger: a standalone Cloudflare Worker** (`shirt-sales-cron-trigger`, project lives at `~/apps/shirt-sales-cron-trigger` — **not part of this git repo**, deployed directly via `wrangler`), whose Cron Trigger calls GitHub's `workflow_dispatch` API at **01:17 UTC** (02:17 BST — most listings go up before midnight, a run takes about an hour, so the data is fresh well before morning). GitHub's own cron scheduler is best-effort and for this repo skipped or delayed *every* slot it was given (08:00 fired six hours late; 04:17 never fired). A Netlify scheduled function did this job first, but Netlify's scheduler never actually invoked it (schedule registered and showed the correct next-execution time, "Run now" returned success with no effect, and the real 01:17 firing silently never happened — a known, unresolved Netlify platform bug as of Sep 2026, not a config issue on this repo's side). See "Resolved" below.
+- **Fallback: the workflow's own cron at 04:17 UTC**, gated by a `guard` job that skips the scrape if any run started in the previous 12 hours — so on a normal day the fallback does nothing, and if the Worker ever fails to fire, GitHub (eventually) does.
 - Manual `workflow_dispatch` is always available (`gh workflow run "Daily Scrape"`).
 - A `concurrency` group means two scrapes never run at once — a second one queues until the first finishes. This was added after GitHub fired the 08:00 scheduled run almost six hours late, on top of a manual run: both re-checked the same 2,400 listings simultaneously and the second to finish would have failed its push.
 
-**The Netlify trigger needs a GitHub token** in the site's environment variables, named `GH_DISPATCH_TOKEN`: a *fine-grained* personal access token (github.com → Settings → Developer settings → Fine-grained tokens) scoped to the `shirt-sales` repository only, with the repository permission **Actions: Read and write** (nothing else). Fine-grained tokens expire (max one year) — set a calendar reminder; when it expires the Netlify function logs "GitHub refused the dispatch: 401" and the 04:17 fallback takes over until it's renewed. Set it from the repo folder with:
+**The Worker needs a GitHub token**, stored as a Cloudflare Worker secret (not a Netlify env var — this moved with the trigger), named `GH_DISPATCH_TOKEN`: a *fine-grained* personal access token (github.com → Settings → Developer settings → Fine-grained tokens) scoped to the `shirt-sales` repository only, with the repository permission **Actions: Read and write** (nothing else). Fine-grained tokens expire (max one year) — set a calendar reminder; when it expires the Worker logs "GitHub refused the dispatch: 401" and the 04:17 fallback takes over until it's renewed. Set it from the Worker's project folder with:
 
 ```bash
-npx netlify env:set GH_DISPATCH_TOKEN "github_pat_..."
+cd ~/apps/shirt-sales-cron-trigger && npx wrangler secret put GH_DISPATCH_TOKEN
 ```
+(paste the token at the hidden prompt — never as a command-line argument, which would land in shell history)
 
-Test the trigger without waiting for 01:17: `npx netlify functions:invoke trigger-scrape` (or the function's URL, `/.netlify/functions/trigger-scrape`) — it should return "dispatched" and a new run should appear in `gh run list`. Mind the concurrency group: if a scrape is already in flight the dispatched one queues behind it.
+Test the trigger without waiting for 01:17: `curl https://shirt-sales-cron-trigger.shirt-sales-cron-trigger.workers.dev` — it should return "triggered" and a new run should appear in `gh run list`. Mind the concurrency group: if a scrape is already in flight the dispatched one queues behind it.
 - Steps: checkout → install deps → run scraper (reads/writes Turso) → `analysis.export` → `analysis.visualise` → move the spreadsheet into `docs/` → deploy `docs/` to Netlify → **alert check** (always runs, see below). No git commit step — there's nothing to commit.
 - Typical duration: scales with the re-check rotation cap and the number of team queries, not with total database size (`03-scraping-strategy.md`).
 
@@ -133,7 +133,9 @@ To test the plumbing without being blocked: `python -m scraper.alert --dry-run` 
 
 **Resolved**: pushing code while a run was in flight used to break that run's own end-of-job `git push` of the regenerated DB/spreadsheet/dashboard (non-fast-forward rejection) — this bit us on 2026-09-07 when the dashboard redesign was pushed mid-run. Moving storage to Turso removed the workflow's git-commit step entirely, so this failure mode no longer exists; code can be pushed freely regardless of an in-flight run.
 
-**Resolved**: GitHub's scheduled trigger was unreliable here (08:00 fired ~6 h late on day one; 04:17 never fired on day two) — fixed by moving the trigger to a Netlify scheduled function, above.
+**Resolved**: GitHub's scheduled trigger was unreliable here (08:00 fired ~6 h late on day one; 04:17 never fired on day two) — fixed by moving the trigger to a Netlify scheduled function, then (below) to a Cloudflare Worker.
+
+**Resolved**: the Netlify scheduled function (`netlify/functions/trigger-scrape.mts`) that replaced the above turned out to be unreliable in a different way — it silently never fired automatically (dashboard showed the correct next-execution time, "Run now" returned success with no effect, function logs stayed empty) while every other signal said it was configured correctly: healthy deploys, correct schedule parsing, working manual dispatch once actually invoked via a local `netlify dev` test. Confirmed via Netlify's own support forums as an active, unresolved 2026 platform bug affecting multiple sites, not something fixable from this repo. Removed 2026-09-10 and replaced with a standalone Cloudflare Worker (above) — untested as of removal for the real unattended firing (next 01:17 UTC), only for manual dispatch.
 
 **Resolved**: GitHub Actions minutes for a private repo (2,000/month free) were already short of the ~150 min/day steady-state usage measured on 2026-09-08 (~4,500 min/month) — fixed by making the repo public (unlimited minutes) once the data itself was moved out of git and out of reach (this section).
 
@@ -212,8 +214,8 @@ Because every `netlify deploy` is a full snapshot, the edge function is only liv
 - [x] Fix player-name false positives (per-word stop-word check, off-topic listing filter) and add Wikipedia squad cross-check (`scraper/squads.py` + monthly workflow)
 - [x] Prune the pre-scope-tightening rows from `data/shirts.db` (3,361 → 443 for condition/season, → 339 after the off-topic filter; local backups `data/shirts.db.pre-cleanup-backup` and `data/shirts.db.pre-chart-fix-backup-*` kept, not committed)
 - [x] Redesign the dashboard (inline SVG, animation, dark mode, table views) and put it behind Basic Auth
-- [ ] Confirm sold detection on a real sold listing
-- [ ] Confirm the 08:00 UTC scheduled trigger fires reliably
+- [x] Confirm sold detection on a real sold listing (2026-09-07, against a known sale — see "Sold detection" in `03-scraping-strategy.md`)
+- [ ] Confirm the Cloudflare Worker cron trigger (01:17 UTC) fires the workflow unattended — manual dispatch confirmed working 2026-09-10, real scheduled firing not yet observed
 - [x] Run the squad-refresh workflow once manually to prove it works in CI before its first scheduled run on 1 Oct (2026-09-07: 85/86 teams in 3m51s, output identical to the local build — "No changes to commit")
 - [x] Move storage to Turso (two databases), stop committing generated files, retire `data/my_sales.json` for `mine.add_sale()`, squash git history, make the repo public — see "Repository visibility"
 - [ ] Confirm a scheduled (not manual) run completes cleanly against Turso

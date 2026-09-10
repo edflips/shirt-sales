@@ -10,7 +10,7 @@ This repo is public (unlimited GitHub Actions minutes); the data isn't — every
 
 - **Scrape** (`scraper/`) — searches Vinted's JSON API as a guest for every team by name ("Arsenal shirt" / "kit" / "top"), filters to "New with tags" + current season + actual football shirts, stores listings in Turso, and re-checks active listings on a rotation to detect when they sell.
 - **Analyse** (`analysis/`) — `export.py` writes a spreadsheet; `visualise.py` builds a self-contained dashboard with inline-SVG charts, including a "My shop" section that tracks the owner's own Vinted listings (from the public wardrobe endpoint) and hand-recorded sales against the market. Both are deployed to Netlify, never committed to this repo.
-- **Automate** (`.github/workflows/`) — `scrape.yml` runs the whole pipeline daily (triggered by a Netlify scheduled function, since GitHub's own cron proved unreliable here) and deploys spreadsheet + dashboard to Netlify; `update-squads.yml` refreshes the player-squad list from Wikipedia monthly. The dashboard sits behind HTTP Basic Auth. If Vinted starts blocking the scraper, the run fails and opens a GitHub Issue.
+- **Automate** (`.github/workflows/`) — `scrape.yml` runs the whole pipeline daily (triggered by a standalone Cloudflare Worker cron job, since both GitHub's own cron and a Netlify scheduled function proved unreliable here — see `docs/06-running.md`) and deploys spreadsheet + dashboard to Netlify; `update-squads.yml` refreshes the player-squad list from Wikipedia monthly. The dashboard sits behind HTTP Basic Auth. If Vinted starts blocking the scraper, the run fails and opens a GitHub Issue.
 
 ## Running locally
 
